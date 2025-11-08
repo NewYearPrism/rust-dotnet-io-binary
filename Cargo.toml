@@ -10,7 +10,14 @@ num-traits = { version = "0.2.19", default-features = false }
 
 [features]
 default = ["io"]
-io = ["std", "arrayvec", "derive_more", "derive_more/from"]
+io = [
+    "std",
+    "arrayvec",
+    "derive_more",
+    "derive_more/from",
+    "derive_more/error",
+    "derive_more/display",
+]
 std = ["arrayvec/std", "derive_more/std"]
 arrayvec = ["dep:arrayvec"]
 derive_more = ["dep:derive_more"]

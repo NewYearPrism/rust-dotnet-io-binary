@@ -27,7 +27,7 @@ impl<T: Write> Write7BitCode for T {
     }
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, derive_more::From, derive_more::Display, derive_more::Error)]
 pub enum ReadError {
     Io(io::Error),
     #[from(skip)]

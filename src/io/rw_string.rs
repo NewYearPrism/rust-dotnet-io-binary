@@ -28,7 +28,7 @@ impl<T: Write7BitCode + Write> Write7BitCodeLengthString for T {
     }
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, derive_more::From, derive_more::Display, derive_more::Error)]
 pub enum ReadError {
     ReadLength(rw_7bit_code::ReadError),
     Io(io::Error),
