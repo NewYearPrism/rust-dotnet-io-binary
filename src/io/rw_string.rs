@@ -1,3 +1,4 @@
+use core::str::Utf8Error;
 use std::{
     io,
     io::{
@@ -37,19 +38,31 @@ pub enum ReadError {
 pub trait Read7BitCodeLengthString {
     fn read_7bit_code_length_string<'a>(
         &mut self,
-        f: impl FnOnce(u32) -> &'a mut String,
+        f: impl FnOnce(u32) -> &'a mut [u8],
     ) -> Result<(), ReadError>;
+
+    fn read_7bit_code_length_string_with_vec<'a>(
+        &mut self,
+        buf: &'a mut Vec<u8>,
+    ) -> Result<(), ReadError> {
+        self.read_7bit_code_length_string(|l| {
+            buf.clear();
+            buf.resize(l as _, 0);
+            buf.as_mut()
+        })?;
+        Ok(())
+    }
 }
 
 impl<T: Read7BitCode + Read> Read7BitCodeLengthString for T {
     fn read_7bit_code_length_string<'a>(
         &mut self,
-        f: impl FnOnce(u32) -> &'a mut String,
+        f: impl FnOnce(u32) -> &'a mut [u8],
     ) -> Result<(), ReadError> {
         let length: u32 = self.read_7bit_code()?;
         let buf = f(length);
         let mut take = self.take(length as _);
-        take.read_to_string(buf)?;
+        take.read_exact(buf)?;
         Ok(())
     }
 }
