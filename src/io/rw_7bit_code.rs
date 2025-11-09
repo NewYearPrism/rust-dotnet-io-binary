@@ -16,11 +16,11 @@ use crate::_7bit_code::{
 };
 
 pub trait Write7bc {
-    fn write_7bc<U: _7BitEncode>(&mut self, value: U) -> io::Result<()>;
+    fn write_7bc(&mut self, value: impl _7BitEncode) -> io::Result<()>;
 }
 
 impl<T: Write> Write7bc for T {
-    fn write_7bc<U: _7BitEncode>(&mut self, value: U) -> io::Result<()> {
+    fn write_7bc(&mut self, value: impl _7BitEncode) -> io::Result<()> {
         let bytes: ArrayVec<_, 16> = value.into_7bit_codes().collect();
         self.write_all(&bytes)?;
         Ok(())
