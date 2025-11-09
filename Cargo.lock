@@ -37,7 +37,7 @@ dependencies = [
 
 [[package]]
 name = "dotnet-io-binary"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "arrayvec",
  "derive_more",
