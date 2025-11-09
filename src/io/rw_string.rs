@@ -6,8 +6,6 @@ use std::{
     },
 };
 
-use num_traits::AsPrimitive;
-
 use crate::io::{
     rw_7bit_code,
     rw_7bit_code::{
@@ -22,7 +20,7 @@ pub trait WriteDotnetStr {
 
 impl<T: Write7bc + Write> WriteDotnetStr for T {
     fn write_dotnet_str(&mut self, s: &str) -> io::Result<()> {
-        self.write_7bc::<u32>(s.len().as_())?;
+        self.write_7bc(s.len() as u32)?;
         self.write_all(s.as_ref())?;
         Ok(())
     }
@@ -35,15 +33,10 @@ pub enum ReadError {
 }
 
 pub trait ReadDotnetStr {
-    fn read_dotnet_str<'a>(
-        &mut self,
-        f: impl FnOnce(u32) -> &'a mut [u8],
-    ) -> Result<(), ReadError>;
+    fn read_dotnet_str<'a>(&mut self, f: impl FnOnce(u32) -> &'a mut [u8])
+    -> Result<(), ReadError>;
 
-    fn read_dotnet_str_to<'a>(
-        &mut self,
-        buf: &'a mut Vec<u8>,
-    ) -> Result<(), ReadError> {
+    fn read_dotnet_str_to<'a>(&mut self, buf: &'a mut Vec<u8>) -> Result<(), ReadError> {
         self.read_dotnet_str(|l| {
             buf.clear();
             buf.resize(l as _, 0);
