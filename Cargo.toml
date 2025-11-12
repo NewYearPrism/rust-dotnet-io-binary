@@ -3,7 +3,7 @@ name = "dotnet-io-binary"
 version = "0.1.0-alpha.2"
 edition = "2024"
 license = "MIT"
-description = "dotnet System.IO.BinaryReader/BinaryWriter functionality in Rust."
+description = "dotnet System.IO.BinaryReader/BinaryWriter functionality."
 readme = "README.md"
 repository = "https://github.com/NewYearPrism/rust-dotnet-io-binary.git"
 
