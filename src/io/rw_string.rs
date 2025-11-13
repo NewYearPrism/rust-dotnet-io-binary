@@ -1,3 +1,4 @@
+use core::ops::DerefMut;
 use std::{
     io,
     io::{
@@ -33,28 +34,30 @@ pub enum ReadError {
 }
 
 pub trait ReadDotnetStr {
-    fn read_dotnet_str<B: AsMut<[u8]>>(&mut self, f: impl FnOnce(u32) -> B)
-    -> Result<B, ReadError>;
+    fn read_dotnet_str<B: DerefMut<Target = [u8]>>(
+        &mut self,
+        f: impl FnOnce(u32) -> B,
+    ) -> Result<B, ReadError>;
 
     fn read_dotnet_str_to<'a>(&mut self, buf: &'a mut Vec<u8>) -> Result<(), ReadError> {
         self.read_dotnet_str(|l| {
             buf.clear();
             buf.resize(l as _, 0);
-            buf
+            buf.deref_mut()
         })?;
         Ok(())
     }
 }
 
 impl<T: Read7bc + Read> ReadDotnetStr for T {
-    fn read_dotnet_str<B: AsMut<[u8]>>(
+    fn read_dotnet_str<B: DerefMut<Target = [u8]>>(
         &mut self,
         f: impl FnOnce(u32) -> B,
     ) -> Result<B, ReadError> {
         let length: u32 = self.read_7bc()?;
         let mut buf = f(length);
         let mut take = self.take(length as _);
-        take.read_exact(buf.as_mut())?;
+        take.read_exact(&mut buf)?;
         Ok(buf)
     }
 }
