@@ -33,28 +33,28 @@ pub enum ReadError {
 }
 
 pub trait ReadDotnetStr {
-    fn read_dotnet_str<'a>(&mut self, f: impl FnOnce(u32) -> &'a mut [u8])
-    -> Result<(), ReadError>;
+    fn read_dotnet_str<B: AsMut<[u8]>>(&mut self, f: impl FnOnce(u32) -> B)
+    -> Result<B, ReadError>;
 
     fn read_dotnet_str_to<'a>(&mut self, buf: &'a mut Vec<u8>) -> Result<(), ReadError> {
         self.read_dotnet_str(|l| {
             buf.clear();
             buf.resize(l as _, 0);
-            buf.as_mut()
+            buf
         })?;
         Ok(())
     }
 }
 
 impl<T: Read7bc + Read> ReadDotnetStr for T {
-    fn read_dotnet_str<'a>(
+    fn read_dotnet_str<B: AsMut<[u8]>>(
         &mut self,
-        f: impl FnOnce(u32) -> &'a mut [u8],
-    ) -> Result<(), ReadError> {
+        f: impl FnOnce(u32) -> B,
+    ) -> Result<B, ReadError> {
         let length: u32 = self.read_7bc()?;
-        let buf = f(length);
+        let mut buf = f(length);
         let mut take = self.take(length as _);
-        take.read_exact(buf)?;
-        Ok(())
+        take.read_exact(buf.as_mut())?;
+        Ok(buf)
     }
 }
