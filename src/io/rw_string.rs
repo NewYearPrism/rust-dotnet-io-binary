@@ -1,4 +1,4 @@
-use core::ops::DerefMut;
+use core::ops::{Deref, DerefMut};
 use std::{
     io,
     io::{
@@ -37,7 +37,7 @@ pub trait ReadDotnetStr {
     fn read_dotnet_str<B: DerefMut<Target = [u8]>>(
         &mut self,
         f: impl FnOnce(u32) -> B,
-    ) -> Result<B, ReadError>;
+    ) -> Result<impl Deref<Target = [u8]>, ReadError>;
 
     fn read_dotnet_str_to<'a>(&mut self, buf: &'a mut Vec<u8>) -> Result<(), ReadError> {
         self.read_dotnet_str(|l| {
@@ -53,7 +53,7 @@ impl<T: Read7bc + Read> ReadDotnetStr for T {
     fn read_dotnet_str<B: DerefMut<Target = [u8]>>(
         &mut self,
         f: impl FnOnce(u32) -> B,
-    ) -> Result<B, ReadError> {
+    ) -> Result<impl Deref<Target = [u8]>, ReadError> {
         let length: u32 = self.read_7bc()?;
         let mut buf = f(length);
         let mut take = self.take(length as _);
