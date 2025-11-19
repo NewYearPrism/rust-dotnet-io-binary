@@ -3,3 +3,4 @@
 pub mod _7bit_code;
 #[cfg(feature = "io")]
 pub mod io;
+pub mod slice;

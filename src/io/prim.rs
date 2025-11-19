@@ -1,4 +1,3 @@
-use core::borrow::Borrow;
 use std::io::{
     self,
     Read,
@@ -8,7 +7,6 @@ use std::io::{
 use num_traits::{
     FromBytes,
     ToBytes,
-    Zero,
 };
 
 pub trait WritePrim {
@@ -23,25 +21,20 @@ impl<T: Write> WritePrim for T {
 }
 
 pub trait ReadPrim {
-    fn read_prim<U: FromBytes + ToBytes + Zero>(&mut self) -> io::Result<U>
-    where
-        <U as ToBytes>::Bytes: Borrow<<U as FromBytes>::Bytes>;
+    fn read_prim<const N: usize, U: FromBytes<Bytes = [u8; N]>>(&mut self) -> io::Result<U>;
 }
 
 impl<T: Read> ReadPrim for T {
-    fn read_prim<U: FromBytes + ToBytes + Zero>(&mut self) -> io::Result<U>
-    where
-        <U as ToBytes>::Bytes: Borrow<<U as FromBytes>::Bytes>,
-    {
-        let mut buf = U::zero().to_le_bytes();
-        self.read_exact(buf.as_mut())?;
-        Ok(U::from_le_bytes(buf.borrow()))
+    fn read_prim<const N: usize, U: FromBytes<Bytes = [u8; N]>>(&mut self) -> io::Result<U> {
+        let mut buf = [0; N];
+        self.read_exact(&mut buf)?;
+        Ok(U::from_le_bytes(&buf))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::io::rw_prim::ReadPrim;
+    use crate::io::prim::ReadPrim;
 
     #[test]
     fn test_read_mixed() {

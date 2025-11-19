@@ -7,12 +7,9 @@ use std::{
     },
 };
 
-use crate::io::{
-    rw_7bit_code,
-    rw_7bit_code::{
-        Read7bc,
-        Write7bc,
-    },
+use crate::io::_7bit_code::{
+    Read7bc,
+    Write7bc,
 };
 
 pub trait WriteDotnetStr {
@@ -29,7 +26,7 @@ impl<T: Write7bc + Write> WriteDotnetStr for T {
 
 #[derive(Debug, derive_more::From, derive_more::Display, derive_more::Error)]
 pub enum ReadError {
-    ReadLength(rw_7bit_code::ReadError),
+    ReadLength(super::_7bit_code::ReadError),
     Io(io::Error),
 }
 

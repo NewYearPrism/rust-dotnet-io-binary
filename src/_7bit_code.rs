@@ -51,13 +51,14 @@ impl<T: PrimInt + Unsigned + AsPrimitive<u8>> Iterator for Into7BitCodes<T> {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let Some(s) = self.0.take() else { return None };
-        let mut next = s.as_();
-        if !(s >> 7).is_zero() {
-            next |= 0x80;
-            self.0.replace(s >> 7);
+        let prev = self.0.take()?;
+        let h = prev >> 7;
+        let mut l7: u8 = prev.as_();
+        if !h.is_zero() {
+            l7 |= 0x80;
+            self.0.replace(h);
         }
-        Some(next)
+        Some(l7)
     }
 }
 
