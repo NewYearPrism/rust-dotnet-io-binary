@@ -15,17 +15,15 @@ use crate::_7bit_code::{
     DecodeState,
 };
 
-pub trait Write7bc {
-    fn write_7bc(&mut self, value: impl _7BitEncode) -> io::Result<()>;
-}
-
-impl<T: Write> Write7bc for T {
+pub trait Write7bc: Write {
     fn write_7bc(&mut self, value: impl _7BitEncode) -> io::Result<()> {
         let bytes: ArrayVec<_, 16> = value.into_7bit_codes().collect();
         self.write_all(&bytes)?;
         Ok(())
     }
 }
+
+impl<T: Write> Write7bc for T {}
 
 #[derive(Debug, derive_more::From, derive_more::Display, derive_more::Error)]
 pub enum ReadError {
@@ -34,11 +32,7 @@ pub enum ReadError {
     DecodeOverflow,
 }
 
-pub trait Read7bc {
-    fn read_7bc<U: _7BitDecode + PrimInt>(&mut self) -> Result<U, ReadError>;
-}
-
-impl<T: Read> Read7bc for T {
+pub trait Read7bc: Read {
     fn read_7bc<U: _7BitDecode + PrimInt>(&mut self) -> Result<U, ReadError> {
         let mut b = [0; 1];
         let mut builder = U::build_from_7bit_codes();
@@ -52,3 +46,5 @@ impl<T: Read> Read7bc for T {
         }
     }
 }
+
+impl<T: Read> Read7bc for T {}

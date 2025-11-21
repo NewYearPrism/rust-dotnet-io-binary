@@ -9,28 +9,24 @@ use num_traits::{
     ToBytes,
 };
 
-pub trait WritePrim {
-    fn write_prim(&mut self, value: impl ToBytes) -> io::Result<()>;
-}
-
-impl<T: Write> WritePrim for T {
+pub trait WritePrim: Write {
     fn write_prim(&mut self, value: impl ToBytes) -> io::Result<()> {
         self.write_all(value.to_le_bytes().as_ref())?;
         Ok(())
     }
 }
 
-pub trait ReadPrim {
-    fn read_prim<const N: usize, U: FromBytes<Bytes = [u8; N]>>(&mut self) -> io::Result<U>;
-}
+impl<T: Write> WritePrim for T {}
 
-impl<T: Read> ReadPrim for T {
+pub trait ReadPrim: Read {
     fn read_prim<const N: usize, U: FromBytes<Bytes = [u8; N]>>(&mut self) -> io::Result<U> {
         let mut buf = [0; N];
         self.read_exact(&mut buf)?;
         Ok(U::from_le_bytes(&buf))
     }
 }
+
+impl<T: Read> ReadPrim for T {}
 
 #[cfg(test)]
 mod tests {
