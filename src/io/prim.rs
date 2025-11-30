@@ -1,7 +1,10 @@
-use std::io::{
-    self,
-    Read,
-    Write,
+use std::{
+    any,
+    io::{
+        self,
+        Read,
+        Write,
+    },
 };
 
 use num_traits::{
@@ -9,20 +12,43 @@ use num_traits::{
     ToBytes,
 };
 
+#[derive(Debug, thiserror::Error)]
+#[error("unable to write `{prim_type_name}`")]
+pub struct WriteError {
+    #[source]
+    source: io::Error,
+    prim_type_name: &'static str,
+}
+
 pub trait WritePrim: Write {
-    fn write_prim(&mut self, value: impl ToBytes) -> io::Result<()> {
-        self.write_all(value.to_le_bytes().as_ref())?;
+    fn write_prim(&mut self, value: impl ToBytes) -> Result<(), WriteError> {
+        self.write_all(value.to_le_bytes().as_ref())
+            .map_err(|source| WriteError {
+                source,
+                prim_type_name: any::type_name_of_val(&value),
+            })?;
         Ok(())
     }
 }
 
 impl<T: Write> WritePrim for T {}
 
+#[derive(Debug, thiserror::Error)]
+#[error("unable to read `{prim_type_name}`")]
+pub struct ReadError {
+    #[source]
+    source: io::Error,
+    prim_type_name: &'static str,
+}
+
 pub trait ReadPrim: Read {
-    fn read_prim<const N: usize, U: FromBytes<Bytes = [u8; N]>>(&mut self) -> io::Result<U> {
+    fn read_prim<const N: usize, T: FromBytes<Bytes = [u8; N]>>(&mut self) -> Result<T, ReadError> {
         let mut buf = [0; N];
-        self.read_exact(&mut buf)?;
-        Ok(U::from_le_bytes(&buf))
+        self.read_exact(&mut buf).map_err(|source| ReadError {
+            source,
+            prim_type_name: any::type_name::<T>(),
+        })?;
+        Ok(FromBytes::from_le_bytes(&buf))
     }
 }
 

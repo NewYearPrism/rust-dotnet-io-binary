@@ -1,8 +1,10 @@
 use crate::slice::_7bit_code::split_7bc;
 
-#[derive(Debug, derive_more::From, derive_more::Display, derive_more::Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum SplitError {
-    Length(super::_7bit_code::SplitError),
+    #[error("unable to split length of str")]
+    Length(#[from] super::_7bit_code::SplitError),
+    #[error("unexpected end of input")]
     End,
 }
 

@@ -1,8 +1,6 @@
 use num_traits::FromBytes;
 
-pub fn split_prim<const N: usize, T: FromBytes<Bytes = [u8; N]>>(
-    buf: &[u8],
-) -> Option<(T, &[u8])> {
+pub fn split_prim<const N: usize, T: FromBytes<Bytes = [u8; N]>>(buf: &[u8]) -> Option<(T, &[u8])> {
     let (bytes, buf1) = buf.split_first_chunk()?;
     Some((FromBytes::from_le_bytes(bytes), buf1))
 }

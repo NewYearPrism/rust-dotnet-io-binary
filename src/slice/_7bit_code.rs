@@ -5,9 +5,11 @@ use crate::_7bit_code::{
     DecodeState,
 };
 
-#[derive(Debug, derive_more::Display, derive_more::Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum SplitError {
+    #[error("unexpected end of input")]
     End,
+    #[error("7-bit encoded integer overflow")]
     Overflow,
 }
 

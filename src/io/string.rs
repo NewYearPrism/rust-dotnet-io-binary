@@ -6,8 +6,16 @@ use crate::io::_7bit_code::{
     Write7bc,
 };
 
+#[derive(Debug, thiserror::Error)]
+pub enum WriteError {
+    #[error("unable to write length")]
+    Length(#[from] super::_7bit_code::WriteError),
+    #[error("unable to write content")]
+    Io(#[from] io::Error),
+}
+
 pub trait WriteDotnetStr: Write7bc {
-    fn write_dotnet_str(&mut self, s: &str) -> io::Result<()> {
+    fn write_dotnet_str(&mut self, s: &str) -> Result<(), WriteError> {
         self.write_7bc(s.len() as u32)?;
         self.write_all(s.as_ref())?;
         Ok(())
@@ -16,10 +24,12 @@ pub trait WriteDotnetStr: Write7bc {
 
 impl<T: Write7bc> WriteDotnetStr for T {}
 
-#[derive(Debug, derive_more::From, derive_more::Display, derive_more::Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum ReadError {
-    ReadLength(super::_7bit_code::ReadError),
-    Io(io::Error),
+    #[error("unable to read length")]
+    Length(#[from] super::_7bit_code::ReadError),
+    #[error("unable to read content")]
+    Io(#[from] io::Error),
 }
 
 pub trait ReadDotnetStr: Read7bc {
